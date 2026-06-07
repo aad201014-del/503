@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>حاسبة الإفراج — أم القرى</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#080e20;--bg2:#0f1628;--bg3:#141c35;--card:#1a2240;
+  --inp:#1e2850;--brd:#2e3a6e;--acc:#4361ee;--acc2:#7b2fbe;
+  --gold:#f7b731;--green:#2ecc71;--dim:#6a7aaa;--light:#c8d4ff;
+  --white:#eef0ff;--red:#e74c3c;--orange:#f39c12;--r:12px;--rs:8px;
+}
+html,body{
+  font-family:'Segoe UI',Tahoma,-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif;
+  background:var(--bg);color:var(--light);min-height:100vh;font-size:15px;
+}
+/* HEADER */
+.hdr{background:linear-gradient(160deg,#060b18,#0d1530 70%,#111a3a);
+  border-bottom:1px solid rgba(67,97,238,.3);padding:24px 20px 18px;text-align:center;}
+.hdr-icon{font-size:2rem;display:block;margin-bottom:5px;}
+.hdr h1{font-size:1.4rem;font-weight:800;color:var(--gold);line-height:1.3;}
+.hdr p{font-size:0.75rem;color:var(--dim);margin-top:4px;}
+.hdr-today{font-size:0.78rem;color:#6dd5ed;margin-top:7px;background:rgba(109,213,237,.08);border:1px solid rgba(109,213,237,.2);border-radius:20px;display:inline-block;padding:3px 14px;}
+/* RESET BTN */
+.btn-reset{display:block;width:100%;padding:12px;background:rgba(231,76,60,.07);border:1.5px solid rgba(231,76,60,.2);border-radius:var(--r);color:#ff8f8f;font-size:0.86rem;font-weight:700;cursor:pointer;text-align:center;touch-action:manipulation;margin-bottom:13px;}
+.btn-reset:active{background:rgba(231,76,60,.15);}
+/* WRAP */
+.wrap{max-width:580px;margin:0 auto;padding:16px 13px 60px;}
+/* CARD */
+.card{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);margin-bottom:13px;overflow:hidden;}
+.card-hdr{padding:12px 16px;font-size:0.83rem;font-weight:700;border-bottom:1px solid var(--brd);}
+.card-hdr.blue  {background:linear-gradient(90deg,#1c2d7a,#243380);color:#99b0ff;}
+.card-hdr.purple{background:linear-gradient(90deg,#2d1060,#3b1580);color:#c89cff;}
+.card-hdr.teal  {background:linear-gradient(90deg,#0a3040,#0e4055);color:#6dd5ed;}
+.card-body{padding:16px;}
+/* FORM */
+.frow{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.frow:last-child{margin-bottom:0;}
+.flabel{font-size:0.79rem;color:var(--dim);font-weight:600;}
+.triple{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:7px;}
+.double{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.sub{font-size:0.66rem;color:var(--dim);text-align:center;margin-top:3px;}
+/* INPUTS */
+input[type="number"]{
+  width:100%;background:var(--inp);border:1.5px solid var(--brd);
+  border-radius:var(--rs);color:var(--gold);font-size:1.05rem;font-weight:700;
+  padding:11px 8px;text-align:center;outline:none;
+  -moz-appearance:textfield;-webkit-appearance:none;appearance:none;
+  transition:border-color .2s;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type="number"]:focus{border-color:var(--acc);}
+/* TOGGLE 2-col */
+.tgrp2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+/* TOGGLE 3-col */
+.tgrp3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.tbtn{
+  padding:12px 7px;border-radius:var(--rs);border:1.5px solid var(--brd);
+  background:var(--bg3);color:var(--dim);font-size:0.78rem;font-weight:700;
+  cursor:pointer;text-align:center;line-height:1.45;transition:all .2s;
+  touch-action:manipulation;
+}
+.tbtn.aq{border-color:var(--acc);background:rgba(67,97,238,.15);color:#99b0ff;}
+.tbtn.ak{border-color:var(--green);background:rgba(46,204,113,.1);color:var(--green);}
+.tbtn.at{border-color:var(--orange);background:rgba(243,156,18,.1);color:var(--orange);}
+.tbtn.an{border-color:#6dd5ed;background:rgba(109,213,237,.1);color:#6dd5ed;}
+/* QURAN SLIDER SECTION */
+.qsec{
+  margin-top:13px;padding:15px;
+  background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.2);
+  border-radius:var(--rs);display:none;
+}
+.qsec.show{display:block;}
+.qhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;}
+.qhdr span{font-size:0.79rem;color:var(--dim);font-weight:600;}
+.pdisp{
+  font-size:1.35rem;font-weight:900;color:var(--green);
+  background:rgba(46,204,113,.12);padding:3px 13px;border-radius:7px;
+}
+input[type="range"]{
+  width:100%;height:48px;-webkit-appearance:none;appearance:none;
+  background:transparent;cursor:pointer;border:none;outline:none;padding:0;
+}
+input[type="range"]::-webkit-slider-runnable-track{
+  height:6px;border-radius:3px;
+  background:linear-gradient(90deg,var(--green) var(--pct,100%),var(--brd) var(--pct,100%));
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:34px;height:34px;border-radius:50%;
+  background:var(--green);box-shadow:0 0 8px rgba(46,204,113,.5);margin-top:-14px;
+}
+input[type="range"]::-moz-range-track{
+  height:6px;border-radius:3px;
+  background:linear-gradient(90deg,var(--green) var(--pct,100%),var(--brd) var(--pct,100%));
+}
+input[type="range"]::-moz-range-thumb{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--green);border:none;box-shadow:0 0 8px rgba(46,204,113,.5);
+}
+.qlabels{display:flex;justify-content:space-between;font-size:0.64rem;color:var(--dim);margin-top:4px;}
+/* DIVIDER */
+.divider{height:1px;background:var(--brd);margin:14px 0;opacity:.5;}
+/* CALC BTN */
+.btn-calc{
+  display:block;width:100%;padding:16px;
+  background:linear-gradient(135deg,var(--acc),#2a45c0);
+  border:none;border-radius:var(--r);color:#fff;
+  font-size:1rem;font-weight:800;cursor:pointer;text-align:center;
+  box-shadow:0 4px 20px rgba(67,97,238,.4);margin-bottom:13px;
+  touch-action:manipulation;letter-spacing:0.2px;
+}
+.btn-calc:active{opacity:.85;}
+/* ERROR */
+.err{
+  background:rgba(231,76,60,.12);border:1px solid rgba(231,76,60,.3);
+  border-radius:var(--rs);padding:12px 15px;color:#ff8f8f;
+  font-size:0.83rem;font-weight:600;text-align:center;margin-bottom:13px;display:none;
+}
+.err.show{display:block;}
+/* RESULTS CARD */
+.rcard{
+  background:var(--bg2);border:1px solid rgba(247,183,49,.2);
+  border-radius:var(--r);overflow:hidden;display:none;
+}
+.rcard.show{display:block;animation:up .35s ease;}
+@keyframes up{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
+.rhdr{
+  background:linear-gradient(90deg,#3d2800,#2a1d00);
+  padding:12px 17px;border-bottom:1px solid rgba(247,183,49,.15);
+  font-size:0.86rem;font-weight:700;color:var(--gold);
+}
+/* SECTION DIVIDER IN RESULTS */
+.rsec-hdr{
+  padding:9px 17px;font-size:0.75rem;font-weight:700;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.rsec-hdr.blue  {background:rgba(67,97,238,.12);color:#8899dd;}
+.rsec-hdr.green {background:rgba(46,204,113,.08);color:var(--green);}
+.rsec-hdr.teal  {background:rgba(109,213,237,.08);color:#6dd5ed;}
+.rsec-hdr.orange{background:rgba(243,156,18,.08);color:var(--orange);}
+/* RESULT ROW */
+.rrow{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 17px;border-bottom:1px solid rgba(255,255,255,.04);
+  gap:8px;
+}
+.rlbl{font-size:0.74rem;color:var(--dim);font-weight:600;flex-shrink:0;}
+.rval{font-size:0.88rem;font-weight:700;text-align:left;word-break:break-word;}
+.rval.gold {color:var(--gold);}
+.rval.green{color:var(--green);}
+.rval.white{color:var(--white);}
+.rval.dim  {color:#8899cc;}
+.rval.orange{color:var(--orange);}
+.rval.teal {color:#6dd5ed;}
+/* HIGHLIGHT BOX */
+.hl-box{
+  padding:17px;
+  border-top:1px solid rgba(46,204,113,.2);
+}
+.hl-box.green-bg{background:linear-gradient(135deg,rgba(46,204,113,.1),rgba(26,138,72,.06));}
+.hl-box.teal-bg {background:linear-gradient(135deg,rgba(109,213,237,.08),rgba(67,150,170,.05));}
+.hl-box.orange-bg{background:linear-gradient(135deg,rgba(243,156,18,.08),rgba(180,110,0,.05));}
+.hl-lbl{font-size:0.74rem;color:var(--dim);font-weight:600;margin-bottom:5px;}
+.hl-h  {font-size:1.55rem;font-weight:900;line-height:1.2;}
+.hl-g  {font-size:0.9rem;font-weight:700;margin-top:4px;}
+.hl-box.green-bg .hl-h{color:var(--green);}
+.hl-box.green-bg .hl-g{color:var(--gold);}
+.hl-box.teal-bg  .hl-h{color:#6dd5ed;}
+.hl-box.teal-bg  .hl-g{color:#aaddee;}
+.hl-box.orange-bg .hl-h{color:var(--orange);}
+.hl-box.orange-bg .hl-g{color:#f8c96b;}
+/* COPY */
+.btn-copy{
+  display:block;width:100%;padding:13px;
+  background:rgba(247,183,49,.07);border:1.5px solid rgba(247,183,49,.2);
+  border-radius:0 0 var(--r) var(--r);color:var(--gold);
+  font-size:0.86rem;font-weight:700;cursor:pointer;text-align:center;
+  touch-action:manipulation;
+}
+.btn-copy:active{background:rgba(247,183,49,.15);}
+/* FOOTER */
+.footer{text-align:center;padding:26px 14px 0;font-size:0.69rem;color:var(--dim);line-height:1.9;}
+/* NOTE BOX */
+.note{
+  background:rgba(109,213,237,.07);border:1px solid rgba(109,213,237,.2);
+  border-radius:var(--rs);padding:10px 13px;
+  font-size:0.76rem;color:#6dd5ed;margin-top:11px;line-height:1.6;
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <span class="hdr-icon">⚖️</span>
+  <h1>حاسبة الإفراج</h1>
+  <p>2378</p>
+  <div class="hdr-today" id="todayDisplay">...</div>
+</div>
+
+<div class="wrap">
+
+  <!-- ═══ بيانات المحكوم عليه ═══ -->
+  <div class="card">
+    <div class="card-hdr blue">📋  بيانات المحكوم عليه</div>
+    <div class="card-body">
+
+      <div class="frow">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;">
+          <span class="flabel">تاريخ الدخول الهجري</span>
+          <button type="button" id="btnToday" style="font-size:0.7rem;padding:4px 10px;border-radius:20px;border:1px solid rgba(109,213,237,.3);background:rgba(109,213,237,.08);color:#6dd5ed;cursor:pointer;font-weight:700;">📅 اليوم</button>
+        </div>
+        <div class="triple">
+          <div>
+            <input type="number" id="eDay" value="1" min="1" max="30" inputmode="numeric">
+            <div class="sub">يوم</div>
+          </div>
+          <div>
+            <input type="number" id="eMon" value="1" min="1" max="12" inputmode="numeric">
+            <div class="sub">شهر</div>
+          </div>
+          <div>
+            <input type="number" id="eYr" value="1447" min="1300" max="1600" inputmode="numeric">
+            <div class="sub">سنة هجرية</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="frow">
+        <span class="flabel">مدة الحكم</span>
+        <div class="triple">
+          <div>
+            <input type="number" id="sYr" value="10" min="0" max="99" inputmode="numeric">
+            <div class="sub">سنوات</div>
+          </div>
+          <div>
+            <input type="number" id="sMon" value="0" min="0" max="11" inputmode="numeric">
+            <div class="sub">أشهر</div>
+          </div>
+          <div>
+            <input type="number" id="sDy" value="0" min="0" max="29" inputmode="numeric">
+            <div class="sub">أيام</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- المدة المُمضاة -->
+      <div class="frow">
+        <span class="flabel">⏳ المدة التي سبق أمضاها في القضية <span style="color:var(--acc);font-size:0.7rem">(اختياري)</span></span>
+        <div class="triple">
+          <div>
+            <input type="number" id="spYr" value="0" min="0" max="99" inputmode="numeric">
+            <div class="sub">سنوات</div>
+          </div>
+          <div>
+            <input type="number" id="spMon" value="0" min="0" max="11" inputmode="numeric">
+            <div class="sub">أشهر</div>
+          </div>
+          <div>
+            <input type="number" id="spDy" value="0" min="0" max="29" inputmode="numeric">
+            <div class="sub">أيام</div>
+          </div>
+        </div>
+        <div class="note">إذا أدخلت مدة هنا، ستظهر في النتائج المدة المتبقية الفعلية بعد خصمها من الحكم.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ نوع الحساب ═══ -->
+  <div class="card">
+    <div class="card-hdr teal">🔢  نوع الحساب</div>
+    <div class="card-body">
+      <div class="tgrp2">
+        <button class="tbtn an" id="bNoPardon" type="button">
+          📅 إفراج بدون عفو<br><small style="font-weight:400;opacity:.75">انتهاء المحكومية</small>
+        </button>
+        <button class="tbtn" id="bWithPardon" type="button">
+          🎁 إضافة عفو<br><small style="font-weight:400;opacity:.75">اختر نوع العفو أدناه</small>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ نوع العفو ═══ -->
+  <div class="card" id="pardonCard">
+    <div class="card-hdr purple">🔖  نوع العفو</div>
+    <div class="card-body">
+
+      <div class="tgrp3">
+        <button class="tbtn" id="bQ" type="button">
+          ⚖️ ربع المدة<br><small style="font-weight:400;opacity:.75">خصم 25%</small>
+        </button>
+        <button class="tbtn" id="bK" type="button">
+          📖 عفو القرآن<br><small style="font-weight:400;opacity:.75">حسب الأجزاء</small>
+        </button>
+        <button class="tbtn" id="bT" type="button">
+          📖 عفو القرآن<br><small style="font-weight:400;opacity:.75">قضايا التهريب وما في حكمها</small>
+        </button>
+      </div>
+
+      <!-- شريط الأجزاء — يظهر لعفو القرآن وقضايا التهريب -->
+      <div class="qsec" id="qsec">
+        <div class="qhdr">
+          <span>عدد الأجزاء المحفوظة</span>
+          <span class="pdisp" id="pdisp">30</span>
+        </div>
+        <input type="range" id="qslider" min="0" max="30" value="30">
+        <div class="qlabels"><span>0</span><span>10</span><span>20</span><span>30</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- زر الحساب -->
+  <button class="btn-calc" id="btnCalc" type="button">⟩  احسب تاريخ الإفراج</button>
+  <button class="btn-reset" id="btnReset" type="button">🗑  مسح وإعادة ضبط</button>
+
+  <!-- خطأ -->
+  <div class="err" id="errBox"></div>
+
+  <!-- ═══ النتائج ═══ -->
+  <div class="rcard" id="rcard">
+    <div class="rhdr">📊  النتائج</div>
+
+    <!-- بيانات الحكم -->
+    <div class="rsec-hdr blue">📋 بيانات الحكم</div>
+    <div class="rrow">
+      <span class="rlbl">📅 تاريخ الدخول هجري</span>
+      <span class="rval white" id="rEH">—</span>
+    </div>
+    <div class="rrow">
+      <span class="rlbl">📅 تاريخ الدخول ميلادي</span>
+      <span class="rval dim" id="rEG">—</span>
+    </div>
+    <div class="rrow">
+      <span class="rlbl">⏱ مدة الحكم الأصلية</span>
+      <span class="rval white" id="rSent">—</span>
+    </div>
+    <div class="rrow" id="rowSpent" style="display:none">
+      <span class="rlbl">⏳ المدة المُمضاة</span>
+      <span class="rval orange" id="rSpent">—</span>
+    </div>
+    <div class="rrow" id="rowRemain" style="display:none">
+      <span class="rlbl">⌛ المدة المتبقية من الحكم</span>
+      <span class="rval gold" id="rRemain">—</span>
+    </div>
+
+    <!-- إفراج بدون عفو -->
+    <div class="rsec-hdr teal" id="secNoPardon">📅 الإفراج بانتهاء المحكومية (بدون عفو)</div>
+    <div class="hl-box teal-bg" id="hlNoPardon">
+      <div class="hl-lbl">🔵 تاريخ انتهاء المحكومية</div>
+      <div class="hl-h" id="rNPH">—</div>
+      <div class="hl-g" id="rNPG">—</div>
+    </div>
+
+    <!-- العفو -->
+    <div id="secPardonBlock">
+      <div class="rsec-hdr green">🎁 تفاصيل العفو</div>
+      <div class="rrow">
+        <span class="rlbl">🔖 نوع العفو</span>
+        <span class="rval gold" id="rPType">—</span>
+      </div>
+      <div class="rrow">
+        <span class="rlbl">🎁 مدة العفو المخصومة</span>
+        <span class="rval green" id="rPDur">—</span>
+      </div>
+      <div class="rrow">
+        <span class="rlbl">⌛ المدة الواجب قضاؤها</span>
+        <span class="rval gold" id="rSDur">—</span>
+      </div>
+      <div class="hl-box green-bg">
+        <div class="hl-lbl">🟢 تاريخ الإفراج بالعفو</div>
+        <div class="hl-h" id="rRelH">—</div>
+        <div class="hl-g" id="rRelG">—</div>
+      </div>
+    </div>
+
+    <button class="btn-copy" id="btnCopy" type="button">📋  نسخ النتيجة</button>
+  </div>
+
+  <div class="footer">
+    يعتمد الحساب على تقويم أم القرى الرسمي — أيام الأشهر الهجرية الفعلية<br>
+    المملكة العربية السعودية — 1 محرم 1447هـ = 28 يونيو 2025م<br>
+    النتائج تقديرية وتخضع لقرار ادارة السجون
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  تقويم أم القرى — حساب الأيام الفعلية لكل شهر هجري
+//  المرجع: 1 محرم 1447هـ = 28 يونيو 2025م = JDN 2460855
+// ═══════════════════════════════════════════════════════
+var JDN_BASE   = 1948440;
+var MONTH_DAYS = 29.530594;
+
+var HM = ["","محرم","صفر","ربيع الأول","ربيع الآخر",
+  "جمادى الأولى","جمادى الآخرة","رجب","شعبان",
+  "رمضان","شوال","ذو القعدة","ذو الحجة"];
+var GM = ["","يناير","فبراير","مارس","أبريل","مايو","يونيو",
+  "يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+
+// ── أيام بداية الشهر الهجري بـ JDN (أم القرى الفعلية) ──────────────────────
+function mJDN(hy, hm) {
+  // الفرق الفعلي من قاعدة أم القرى — كل شهر إما 29 أو 30 يوم
+  var N = (hy - 1) * 12 + (hm - 1);
+  return JDN_BASE + Math.round(N * MONTH_DAYS);
+}
+
+// طول الشهر الهجري الفعلي (29 أو 30)
+function monthLen(hy, hm) {
+  var next_hm = hm === 12 ? 1 : hm + 1;
+  var next_hy = hm === 12 ? hy + 1 : hy;
+  return mJDN(next_hy, next_hm) - mJDN(hy, hm);
+}
+
+// ── تحويلات JDN ──────────────────────────────────────────────────────────────
+function jdnToG(j) {
+  var l=j+68569, n=Math.floor(4*l/146097);
+  l=l-Math.floor((146097*n+3)/4);
+  var i=Math.floor(4000*(l+1)/1461001);
+  l=l-Math.floor(1461*i/4)+31;
+  var jj=Math.floor(80*l/2447), d=l-Math.floor(2447*jj/80);
+  l=Math.floor(jj/11);
+  return {y:100*(n-49)+i+l, m:jj+2-12*l, d:d};
+}
+function hToJDN(hy,hm,hd) { return mJDN(hy,hm) + hd - 1; }
+function jdnToH(jdn) {
+  var na=(jdn-JDN_BASE)/MONTH_DAYS;
+  var ya=Math.floor(na/12)+1, ma=Math.floor(na%12)+1;
+  for(var dy=-1;dy<=1;dy++) for(var dm=-2;dm<=3;dm++) {
+    var hy=ya+dy, hm=ma+dm;
+    while(hm>12){hm-=12;hy++;} while(hm<1){hm+=12;hy--;}
+    if(hy<1) continue;
+    var s=mJDN(hy,hm), e=mJDN(hm===12?hy+1:hy, hm===12?1:hm+1);
+    if(s<=jdn&&jdn<e) return {hy:hy,hm:hm,hd:jdn-s+1};
+  }
+  return null;
+}
+
+// ── حساب إجمالي أيام المحكومية بالأيام الفعلية لكل شهر ─────────────────────
+function sentDays(hy, hm, hd, sy, sm, sd) {
+  // تاريخ النهاية = تاريخ الدخول + المدة
+  var totalM = (hy-1)*12 + (hm-1) + sy*12 + sm;
+  var ey = Math.floor(totalM/12)+1;
+  var em = totalM%12 + 1;
+  // أضف الأيام فوق ذلك
+  var startJDN = hToJDN(hy, hm, hd);
+  var endJDN   = mJDN(ey, em) + (hd-1) + sd;
+  // إذا تجاوز اليوم طول الشهر، تعديل
+  var ml = monthLen(ey, em);
+  if(hd > ml) endJDN = mJDN(ey, em) + ml - 1 + sd;
+  return endJDN - startJDN;
+}
+
+// ── حساب مدة العفو بالأيام الفعلية (بدل القيمة الثابتة 29.53) ──────────────
+// نحسب الفرق الحقيقي من خلال إضافة الأشهر يوماً يوماً عبر JDN
+function pardonMonthsToRealDays(startJDN, pardonMonthsFrac) {
+  // pardonMonthsFrac = عدد أشهر العفو (قد يكون كسراً)
+  var wholeM = Math.floor(pardonMonthsFrac);
+  var fracM  = pardonMonthsFrac - wholeM;
+  // ابدأ من تاريخ الإفراج الأصلي وارجع بمدة العفو
+  var h = jdnToH(startJDN);
+  if(!h) return Math.round(pardonMonthsFrac * 29.530594);
+  // أضف الأشهر الكاملة
+  var tm = (h.hy-1)*12 + (h.hm-1) + wholeM;
+  var ey = Math.floor(tm/12)+1, em = tm%12+1;
+  var endJDN = mJDN(ey,em) + (h.hd-1);
+  // الكسر: نضرب بطول الشهر الفعلي
+  var ml = monthLen(ey,em);
+  endJDN += Math.round(fracM * ml);
+  return endJDN - startJDN;
+}
+
+// ── تحويل عدد الأيام → سنوات/أشهر/أيام هجرية فعلية ─────────────────────────
+// نمشي شهراً شهراً حسب الطول الفعلي لكل شهر
+function daysToHijriYMD(startJDN, totalDays) {
+  if(totalDays <= 0) return {y:0,m:0,d:0};
+  var h = jdnToH(startJDN);
+  if(!h) { // fallback
+    var Y=354.36667,M=29.53059;
+    var y=Math.floor(totalDays/Y),r=totalDays-y*Y;
+    var m=Math.floor(r/M),d=Math.round(r-m*M);
+    if(d>=30){m++;d-=30;} if(m>=12){y++;m-=12;}
+    return {y:Math.max(0,y),m:Math.max(0,m),d:Math.max(0,d)};
+  }
+  var hy=h.hy, hm=h.hm;
+  var rem = totalDays;
+  var years=0, months=0;
+  // اطرح سنة كاملة (12 شهر) في كل مرة
+  while(true) {
+    var yearDays=0;
+    for(var mm=0;mm<12;mm++){
+      var ym2=(hm-1+mm)%12+1;
+      var yy2=hy+Math.floor((hm-1+mm)/12);
+      yearDays+=monthLen(yy2,ym2);
+    }
+    if(rem>=yearDays){rem-=yearDays;years++;hy+=1;}
+    else break;
+  }
+  // اطرح شهراً شهراً
+  while(rem>0){
+    var ml=monthLen(hy,hm);
+    if(rem>=ml){rem-=ml;months++;hm++;if(hm>12){hm=1;hy++;}}
+    else break;
+  }
+  return {y:years,m:months,d:rem};
+}
+
+// ── تنسيق المدة ──────────────────────────────────────────────────────────────
+function fmtD(o) {
+  var p=[];
+  if(o.y) p.push(o.y===1?"سنة":o.y+" سنوات");
+  if(o.m) p.push(o.m===1?"شهر":o.m+" أشهر");
+  if(o.d) p.push(o.d===1?"يوم":o.d+" أيام");
+  return p.join(" و ")||"أقل من يوم";
+}
+function fmtH(hy,hm,hd){return("0"+hd).slice(-2)+" "+HM[hm]+" "+hy+"هـ";}
+function fmtG(g){return("0"+g.d).slice(-2)+" "+GM[g.m]+" "+g.y+"م";}
+
+// ═══════════════════════════════════════════════════════
+//  حالة الواجهة
+// ═══════════════════════════════════════════════════════
+var calcMode  = 0; // 0=بدون عفو, 1=مع عفو
+var pardonType= 1; // 1=ربع, 2=قرآن, 3=تهريب
+
+function g(id){return document.getElementById(id);}
+
+function selMode(m) {
+  calcMode = m;
+  g('bNoPardon').className  = 'tbtn'+(m===0?' an':'');
+  g('bWithPardon').className = 'tbtn'+(m===1?' aq':'');
+  g('pardonCard').style.display = m===1?'':'none';
+  // إخفاء نتائج العفو عند التبديل لبدون عفو
+  if(m===0) g('secPardonBlock').style.display='none';
+}
+
+function selP(t) {
+  pardonType = t;
+  g('bQ').className = 'tbtn'+(t===1?' aq':'');
+  g('bK').className = 'tbtn'+(t===2?' ak':'');
+  g('bT').className = 'tbtn'+(t===3?' at':'');
+  g('qsec').className = 'qsec'+(t===2||t===3?' show':'');
+}
+
+function updSlider() {
+  var sl=g('qslider'), v=sl.value;
+  g('pdisp').textContent=v;
+  var pct=(v/30*100).toFixed(1)+'%';
+  sl.style.setProperty('--pct',pct);
+  sl.style.background='linear-gradient(90deg,var(--green) '+pct+',var(--brd) '+pct+')';
+}
+
+// ═══════════════════════════════════════════════════════
+//  الحساب الرئيسي
+// ═══════════════════════════════════════════════════════
+function showErr(msg){var e=g('errBox');e.textContent=msg;e.className='err show';g('rcard').className='rcard';}
+function hideErr(){g('errBox').className='err';}
+
+function calc() {
+  hideErr();
+  var hd = parseInt(g('eDay').value)||0;
+  var hm = parseInt(g('eMon').value)||0;
+  var hy = parseInt(g('eYr').value)||0;
+  var sy = parseInt(g('sYr').value)||0;
+  var sm = parseInt(g('sMon').value)||0;
+  var sd = parseInt(g('sDy').value)||0;
+  var spYr  = parseInt(g('spYr').value)||0;
+  var spMon = parseInt(g('spMon').value)||0;
+  var spDy  = parseInt(g('spDy').value)||0;
+  var pts   = parseInt(g('qslider').value);
+
+  // Validate
+  if(hy<1300||hy>1600) return showErr("⚠ السنة الهجرية يجب أن تكون بين 1300 و 1600 — تأكد من إدخال السنة الهجرية وليس الميلادية");
+  if(hm<1||hm>12)      return showErr("⚠ الشهر يجب أن يكون بين 1 و 12 — تأكد من إدخال رقم الشهر الهجري");
+  if(hd<1||hd>30)      return showErr("⚠ اليوم يجب أن يكون بين 1 و 30");
+  if(hd > monthLen(hy,hm)) return showErr("⚠ هذا الشهر يحتوي على "+ monthLen(hy,hm) +" يوماً فقط في تقويم أم القرى — يرجى تصحيح اليوم");
+  if(!sy&&!sm&&!sd)    return showErr("⚠ يجب إدخال مدة الحكم — أدخل السنوات أو الأشهر أو الأيام على الأقل");
+
+  // ── إجمالي أيام الحكم بالأيام الفعلية ──
+  var eJDN     = hToJDN(hy,hm,hd);
+  var totalDays = sentDays(hy,hm,hd,sy,sm,sd);
+
+  // ── المدة المُمضاة ──
+  var hasSpent = (spYr>0||spMon>0||spDy>0);
+  var spentDays = 0;
+  if(hasSpent) {
+    spentDays = sentDays(hy,hm,hd,spYr,spMon,spDy);
+    if(spentDays > totalDays) return showErr("⚠ المدة المُمضاة ("+ fmtD(daysToHijriYMD(eJDN, spentDays)) +") أكبر من مدة الحكم الأصلية — يرجى المراجعة");
+  }
+
+  // ── الإفراج بدون عفو (انتهاء المحكومية) ──
+  var noPardonJDN  = eJDN + totalDays;
+  var noPardonH    = jdnToH(noPardonJDN);
+  var noPardonG    = jdnToG(noPardonJDN);
+
+  // ── عرض بيانات الحكم ──
+  var sentDur = daysToHijriYMD(eJDN, totalDays);
+  g('rEH').textContent   = fmtH(hy,hm,hd);
+  g('rEG').textContent   = fmtG(jdnToG(eJDN));
+  g('rSent').textContent = fmtD(sentDur);
+
+  if(hasSpent) {
+    var spentDur   = daysToHijriYMD(eJDN, spentDays);
+    var remainDays = totalDays - spentDays;
+    var remainDur  = daysToHijriYMD(eJDN + spentDays, remainDays);
+    g('rSpent').textContent  = fmtD(spentDur);
+    g('rRemain').textContent = fmtD(remainDur);
+    g('rowSpent').style.display  = '';
+    g('rowRemain').style.display = '';
+  } else {
+    g('rowSpent').style.display  = 'none';
+    g('rowRemain').style.display = 'none';
+  }
+
+  // ── إفراج بدون عفو ──
+  g('rNPH').textContent = fmtH(noPardonH.hy,noPardonH.hm,noPardonH.hd);
+  g('rNPG').textContent = fmtG(noPardonG);
+  g('secNoPardon').style.display  = '';
+  g('hlNoPardon').style.display   = '';
+
+  // ── العفو ──
+  if(calcMode===1) {
+    var pardonDays, serveDays, plbl;
+    // إجمالي الأشهر الفعلية للحكم (للحساب الدقيق لعفو القرآن)
+    var totalRealMonths = sy*12 + sm + sd/29.530594;
+
+    if(pardonType===1) {
+      // ربع المدة: خصم 25% من إجمالي الأيام الفعلية
+      pardonDays = Math.round(totalDays * 0.25);
+      serveDays  = totalDays - pardonDays;
+      plbl = "ربع المدة (خصم 25%)";
+
+    } else if(pardonType===2) {
+      // عفو القرآن: (الأجزاء÷30) × 50% × الأشهر الفعلية
+      var pardonMonths = (pts/30) * 0.5 * totalRealMonths;
+      // الحساب بالأيام الفعلية من تاريخ الإفراج بدون عفو
+      pardonDays = pardonMonthsToRealDays(eJDN, pardonMonths);
+      serveDays  = totalDays - pardonDays;
+      plbl = "عفو القرآن ("+pts+"/30 جزء)";
+
+    } else {
+      // قضايا التهريب: نصف عفو القرآن
+      // (الأجزاء÷30) × 25% × الأشهر الفعلية
+      var pardonMonthsT = (pts/30) * 0.25 * totalRealMonths;
+      pardonDays = pardonMonthsToRealDays(eJDN, pardonMonthsT);
+      serveDays  = totalDays - pardonDays;
+      plbl = "ربع المدة - قضايا التهريب ("+pts+"/30 جزء)";
+    }
+
+    // إذا وُجدت مدة مُمضاة، اطرحها من serveDays
+    var effectiveServe = Math.max(0, serveDays - spentDays);
+    var relJDN = eJDN + (hasSpent ? spentDays + effectiveServe : serveDays);
+    var relH   = jdnToH(relJDN);
+    var relG   = jdnToG(relJDN);
+
+    var pardDur = daysToHijriYMD(eJDN, pardonDays);
+    var servDur = daysToHijriYMD(eJDN + pardonDays, serveDays);
+
+    g('rPType').textContent = plbl;
+    g('rPDur').textContent  = fmtD(pardDur);
+    g('rSDur').textContent  = fmtD(servDur);
+    g('rRelH').textContent  = fmtH(relH.hy,relH.hm,relH.hd);
+    g('rRelG').textContent  = fmtG(relG);
+    g('secPardonBlock').style.display = '';
+  } else {
+    g('secPardonBlock').style.display = 'none';
+  }
+
+  g('rcard').className='rcard show';
+  setTimeout(function(){
+    g('rcard').scrollIntoView({behavior:'smooth',block:'nearest'});
+  },120);
+}
+
+// ── نسخ النتيجة ──────────────────────────────────────────────────────────────
+function copyRes() {
+  var lines = ["📋 حاسبة الإفراج — تقويم أم القرى","━━━━━━━━━━━━━━━━━━━━━"];
+  lines.push("📅 تاريخ الدخول: "+g('rEH').textContent);
+  lines.push("⏱ مدة الحكم: "+g('rSent').textContent);
+  if(g('rowSpent').style.display!=='none'){
+    lines.push("⏳ المدة المُمضاة: "+g('rSpent').textContent);
+    lines.push("⌛ المتبقي: "+g('rRemain').textContent);
+  }
+  lines.push("━━━━━━━━━━━━━━━━━━━━━");
+  lines.push("📅 إفراج بدون عفو: "+g('rNPH').textContent+" / "+g('rNPG').textContent);
+  if(g('secPardonBlock').style.display!=='none'){
+    lines.push("🔖 العفو: "+g('rPType').textContent);
+    lines.push("🎁 مدة العفو: "+g('rPDur').textContent);
+    lines.push("🟢 إفراج بالعفو: "+g('rRelH').textContent+" / "+g('rRelG').textContent);
+  }
+  var txt=lines.join("\n");
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){
+      g('btnCopy').textContent='✅  تم النسخ!';
+      setTimeout(function(){g('btnCopy').textContent='📋  نسخ النتيجة';},2000);
+    }).catch(function(){fallbackCopy(txt);});
+  } else {fallbackCopy(txt);}
+}
+function fallbackCopy(txt){
+  var ta=document.createElement('textarea');
+  ta.value=txt;ta.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');
+    g('btnCopy').textContent='✅  تم النسخ!';
+    setTimeout(function(){g('btnCopy').textContent='📋  نسخ النتيجة';},2000);
+  }catch(e){alert(txt);}
+  document.body.removeChild(ta);
+}
+
+// ── تهيئة ──────────────────────────────────────────────────────────────────
+// ── عرض تاريخ اليوم الهجري ───────────────────────────────────────────────────
+function showTodayHijri() {
+  var now = new Date();
+  // JDN من التاريخ الميلادي
+  var a = Math.floor((14 - (now.getMonth()+1)) / 12);
+  var y = now.getFullYear() + 4800 - a;
+  var m = (now.getMonth()+1) + 12*a - 3;
+  var jdn = now.getDate() + Math.floor((153*m+2)/5) + 365*y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) - 32045;
+  var h = jdnToH(jdn);
+  if(h) {
+    g('todayDisplay').textContent = 'اليوم: ' + fmtH(h.hy, h.hm, h.hd);
+  }
+}
+
+// ── تعبئة تاريخ اليوم في حقول الإدخال ───────────────────────────────────────
+function fillToday() {
+  var now = new Date();
+  var a = Math.floor((14 - (now.getMonth()+1)) / 12);
+  var y = now.getFullYear() + 4800 - a;
+  var m = (now.getMonth()+1) + 12*a - 3;
+  var jdn = now.getDate() + Math.floor((153*m+2)/5) + 365*y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) - 32045;
+  var h = jdnToH(jdn);
+  if(h) {
+    g('eDay').value = h.hd;
+    g('eMon').value = h.hm;
+    g('eYr').value  = h.hy;
+  }
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+
+// ── إعادة الضبط ───────────────────────────────────────────────────────────────
+function resetAll() {
+  g('eDay').value = ''; g('eMon').value = ''; g('eYr').value = '1447';
+  g('sYr').value  = ''; g('sMon').value = ''; g('sDy').value  = '';
+  g('spYr').value = '0'; g('spMon').value = '0'; g('spDy').value = '0';
+  g('qslider').value = 30; updSlider();
+  selMode(0); selP(1);
+  g('pardonCard').style.display = 'none';
+  g('rcard').className = 'rcard';
+  hideErr();
+  if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  updSlider();
+  selMode(0);
+  selP(1);
+  g('pardonCard').style.display='none';
+  showTodayHijri();
+  g('btnCalc').addEventListener('click', function(){
+    if(navigator.vibrate) navigator.vibrate(40);
+    calc();
+  });
+  g('btnCopy').addEventListener('click',copyRes);
+  g('btnReset').addEventListener('click',resetAll);
+  g('btnToday').addEventListener('click',fillToday);
+  g('bNoPardon').addEventListener('click',function(){selMode(0);});
+  g('bWithPardon').addEventListener('click',function(){selMode(1);});
+  g('bQ').addEventListener('click',function(){selP(1);});
+  g('bK').addEventListener('click',function(){selP(2);});
+  g('bT').addEventListener('click',function(){selP(3);});
+  g('qslider').addEventListener('input',updSlider);
+  g('qslider').addEventListener('change',updSlider);
+});
+</script>
+</body>
+</html>
