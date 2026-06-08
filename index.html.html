@@ -56,8 +56,8 @@ input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;}
 input[type="number"]:focus{border-color:var(--acc);}
 /* TOGGLE 2-col */
 .tgrp2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-/* TOGGLE 3-col */
-.tgrp3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+/* TOGGLE 4-col */
+.tgrp4{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
 .tbtn{
   padding:12px 7px;border-radius:var(--rs);border:1.5px solid var(--brd);
   background:var(--bg3);color:var(--dim);font-size:0.78rem;font-weight:700;
@@ -68,6 +68,7 @@ input[type="number"]:focus{border-color:var(--acc);}
 .tbtn.ak{border-color:var(--green);background:rgba(46,204,113,.1);color:var(--green);}
 .tbtn.at{border-color:var(--orange);background:rgba(243,156,18,.1);color:var(--orange);}
 .tbtn.an{border-color:#6dd5ed;background:rgba(109,213,237,.1);color:#6dd5ed;}
+.tbtn.ae{border-color:#a78bfa;background:rgba(167,139,250,.12);color:#a78bfa;}
 /* QURAN SLIDER SECTION */
 .qsec{
   margin-top:13px;padding:15px;
@@ -293,9 +294,12 @@ input[type="range"]::-moz-range-thumb{
     <div class="card-hdr purple">🔖  نوع العفو</div>
     <div class="card-body">
 
-      <div class="tgrp3">
+      <div class="tgrp4">
         <button class="tbtn" id="bQ" type="button">
-          ⚖️ ربع المدة<br><small style="font-weight:400;opacity:.75">خصم 25%</small>
+          ⚖️ ربع المدة
+        </button>
+        <button class="tbtn" id="bE" type="button">
+          🎓 برامج التعليم والتدريب
         </button>
         <button class="tbtn" id="bK" type="button">
           📖 عفو القرآن<br><small style="font-weight:400;opacity:.75">حسب الأجزاء</small>
@@ -529,7 +533,7 @@ function fmtG(g){return("0"+g.d).slice(-2)+" "+GM[g.m]+" "+g.y+"م";}
 //  حالة الواجهة
 // ═══════════════════════════════════════════════════════
 var calcMode  = 0; // 0=بدون عفو, 1=مع عفو
-var pardonType= 1; // 1=ربع, 2=قرآن, 3=تهريب
+var pardonType= 1; // 1=ربع, 2=قرآن, 3=تهريب, 4=تعليم وتدريب
 
 function g(id){return document.getElementById(id);}
 
@@ -545,6 +549,7 @@ function selMode(m) {
 function selP(t) {
   pardonType = t;
   g('bQ').className = 'tbtn'+(t===1?' aq':'');
+  g('bE').className = 'tbtn'+(t===4?' ae':'');
   g('bK').className = 'tbtn'+(t===2?' ak':'');
   g('bT').className = 'tbtn'+(t===3?' at':'');
   g('qsec').className = 'qsec'+(t===2||t===3?' show':'');
@@ -637,6 +642,12 @@ function calc() {
       pardonDays = Math.round(totalDays * 0.25);
       serveDays  = totalDays - pardonDays;
       plbl = "ربع المدة (خصم 25%)";
+
+    } else if(pardonType===4) {
+      // برامج التعليم والتدريب: خصم 15% من إجمالي الأيام الفعلية
+      pardonDays = Math.round(totalDays * 0.15);
+      serveDays  = totalDays - pardonDays;
+      plbl = "برامج التعليم والتدريب (خصم 15%)";
 
     } else if(pardonType===2) {
       // عفو القرآن: (الأجزاء÷30) × 50% × الأشهر الفعلية
@@ -776,6 +787,7 @@ document.addEventListener('DOMContentLoaded',function(){
   g('bNoPardon').addEventListener('click',function(){selMode(0);});
   g('bWithPardon').addEventListener('click',function(){selMode(1);});
   g('bQ').addEventListener('click',function(){selP(1);});
+  g('bE').addEventListener('click',function(){selP(4);});
   g('bK').addEventListener('click',function(){selP(2);});
   g('bT').addEventListener('click',function(){selP(3);});
   g('qslider').addEventListener('input',updSlider);
